@@ -1,0 +1,44 @@
+- name: Copy MySQL 7.5 repo
+  copy:
+    src: "{{ playbook_dir }}/roles/files/mysql-community.repo"
+    dest: /etc/yum.repos.d/mysql-community.repo
+
+- name: Download and Install management nodes
+  yum:
+    name: mysql-cluster-community-management-server
+    state: present
+    update_cache: yes
+
+- name: Install init file
+  copy:
+    src: ndb_mgmd.init
+    dest: /etc/init.d/ndb_mgmd
+
+- name: Activate init file
+  service:
+    name: ndb_mgmd
+    enabled: yes
+
+- name: Create /var/lib/mysql-cluster
+  file:
+    path: "/var/lib/mysql-cluster"
+    state: directory
+
+- name: Create /usr/local/mysql/data
+  file:
+    path: "/usr/local/mysql/data"
+    state: directory
+
+- name: Create log file
+  file:
+    path: "/var/lib/mysql-cluster/ndb_1_cluster.log"
+    state: touch
+
+- name: Copy config.ini
+  template:
+    src: "config.ini"
+    dest: "/var/lib/mysql-cluster/config.ini"
+
+- name: Initialize ndb_mgmd
+  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
+#  --no-nodeid-checks

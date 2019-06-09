@@ -1,0 +1,6 @@
+[mysql-cluster-7.5-community]
+name=MySQL Cluster 7.5 Community
+baseurl=http://repo.mysql.com/yum/mysql-cluster-7.5-community/el/7/$basearch/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql

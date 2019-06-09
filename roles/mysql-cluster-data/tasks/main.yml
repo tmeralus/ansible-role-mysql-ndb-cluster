@@ -1,0 +1,47 @@
+- name: Copy MySQL 7.5 repo
+  copy:
+    src: "{{ playbook_dir }}/roles/files/mysql-community.repo"
+    dest: /etc/yum.repos.d/mysql-community.repo
+
+- name: remove mariadb-libs
+  yum:
+    name: mariadb-libs
+    state: absent
+
+- name: yum clean all
+  command: yum clean all
+
+- name: Download and Install cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
+  yum:
+    name: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
+    state: installed
+
+- name: Download and Install Data Node binaries
+  yum:
+    name: mysql-cluster-community-server
+    state: present
+    #update_cache: yes
+
+- name: Copy config
+  template:
+    src: my.cnf
+    dest: /etc/my.cnf
+
+- name: Create /usr/local/mysql/data/ndbinfo
+  file:
+    path: "/usr/local/mysql/data/ndbinfo"
+    state: directory
+  #  mode: 0755
+
+- name: Install init file
+  copy:
+    src: ndbd.init
+    dest: /etc/init.d/ndbd
+
+- name: Activate init file
+  service:
+    name: ndbd
+    enabled: yes
+
+- name: Initialize ndbd
+  command: /usr/local/mysql/bin/ndbd --initial creates=/usr/local/mysql/data/ndbinfo/
