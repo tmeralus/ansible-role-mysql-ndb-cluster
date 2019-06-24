@@ -1,37 +1,28 @@
-- name: Copy MySQL 7.5 repo
-  copy:
-    src: "{{ playbook_dir }}/roles/files/mysql-community.repo"
-    dest: /etc/yum.repos.d/mysql-community.repo
+#- name: Download binaries
+#  command: wget --continue -P /var/tmp http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
+- name: Download binaries
+  get_url:
+    url: http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
+    dest: /var/tmp
+#    mode: '0440'
 
-- name: remove mariadb-libs
-  yum:
-    name: mariadb-libs
-    state: absent
+- name: Extract binaries
+  unarchive:
+    src: /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
+    dest: /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64
 
-- name: yum clean all
-  command: yum clean all
+#- name: Extract binaries
+#  command: tar -C /var/tmp -xzf /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz creates=/var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64
 
-- name: Download and Install cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
-  yum:
-    name: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
-    state: installed
+- name: Install nbd binaries
+  command: install /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64/bin/ndbd /usr/local/bin/ndbd
+  args:
+    creates: /usr/local/bin/ndbd
 
-- name: Download and Install Data Node binaries
-  yum:
-    name: mysql-cluster-community-server
-    state: present
-    #update_cache: yes
-
-- name: Copy config
+- name: Install config
   template:
     src: my.cnf
     dest: /etc/my.cnf
-
-- name: Create /usr/local/mysql/data/ndbinfo
-  file:
-    path: "/usr/local/mysql/data/ndbinfo"
-    state: directory
-  #  mode: 0755
 
 - name: Install init file
   copy:
@@ -44,4 +35,6 @@
     enabled: yes
 
 - name: Initialize ndbd
-  command: /usr/local/mysql/bin/ndbd --initial creates=/usr/local/mysql/data/ndbinfo/
+  command: /usr/local/mysql/bin/ndbd --initial
+  args:
+    creates: /usr/local/mysql/data/ndbinfo/

@@ -1,44 +1,49 @@
-- name: Copy MySQL 7.5 repo
-  copy:
-    src: "{{ playbook_dir }}/roles/files/mysql-community.repo"
-    dest: /etc/yum.repos.d/mysql-community.repo
+- name: Download and Extract Mysql Cluster binaries
+  unarchive:
+    src: "http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"
+    dest: /var/tmp/
+    remote_src: yes
 
-- name: Download and Install management nodes
-  yum:
-    name: mysql-cluster-community-management-server
-    state: present
-    update_cache: yes
+- name: Extract binaries
+  command: tar -C /var/tmp -xzf /var/tmp/mysql-cluster/.tar.gz
+  args:
+    creates: /var/tmp/mysql-cluster/
+  become: true
+
+- name: Install nbd binaries
+  command: install ndb_mgmd ndb_mgm /usr/local/bin/
+  args:
+    chdir: "/var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64/bin"
+    creates: /usr/local/bin/ndb_mgmd
+  become: true
 
 - name: Install init file
   copy:
     src: ndb_mgmd.init
     dest: /etc/init.d/ndb_mgmd
+  become: true
 
 - name: Activate init file
   service:
     name: ndb_mgmd
     enabled: yes
+  become: true
 
-- name: Create /var/lib/mysql-cluster
+- name: Create data dir
   file:
-    path: "/var/lib/mysql-cluster"
+    path: /var/lib/mysql-cluster
     state: directory
+  # mode: 0644
+  become: true
 
-- name: Create /usr/local/mysql/data
-  file:
-    path: "/usr/local/mysql/data"
-    state: directory
-
-- name: Create log file
-  file:
-    path: "/var/lib/mysql-cluster/ndb_1_cluster.log"
-    state: touch
-
-- name: Copy config.ini
+- name: Copy config
   template:
-    src: "config.ini"
-    dest: "/var/lib/mysql-cluster/config.ini"
+    src: config.ini
+    dest: /var/lib/mysql-cluster/config.ini
+  become: true
 
 - name: Initialize ndb_mgmd
   command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
-#  --no-nodeid-checks
+  args:
+    creates: /var/lib/mysql-cluster/ndb_1_cluster.log
+  become: true
