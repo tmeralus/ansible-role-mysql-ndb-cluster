@@ -18,3 +18,12 @@
   become_method: sudo
   roles:
   - mysql-cluster-sql
+
+
+# fix mysql-cluster-mgm template with node=id
+#  create systemd script   name: ndb_mgmd
+# fix mysql-cluster-data Initialize ndbd
+# fix mysql sql symlink
+
+# inspiration
+# https://github.com/mdom/ansible-mysql-cluster/blob/master/roles/mysql-cluster-sql/tasks/main.yml

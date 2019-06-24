@@ -1,102 +1,86 @@
-# Load variables to set environment parameters for DUO authentication
-- name: Load a variables from env vars
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ playbook_dir }}/roles/var/default.yml"
+- name: Download and Extract Mysql Sql Cluster binaries
+  unarchive:
+    src: "http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"
+    dest: /var/tmp
+    remote_src: yes
+  become: true
 
-- name: Copy MySQL 7.5 repo
-  copy:
-    src: "{{ playbook_dir }}/roles/files/mysql-community.repo"
-    dest: /etc/yum.repos.d/mysql-community.repo
+- name: Extract binaries
+  command: tar -C /usr/local -xzf /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
+  args:
+    creates: /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64
+  become: true
 
-- name: remove mariadb-libs
-  yum:
-    name: mariadb-libs
-    state: absent
+#- name: Link binary directory to short name
+#  command: ln -s /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64 /usr/local/mysql
+- name: Create /usr/local/mysql directory
+  file:
+    path: /usr/local/mysql
+    state: directory
+  become: true
 
-- name: yum clean all
-  command: yum clean all
+- name: Create symlink for /usr/local/mysql
+  file:
+    src: /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64
+    dest: /usr/local/mysql
+    state: link
+  become: true
 
-- name: Download and Install cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
-  yum:
-    name: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-lib-2.1.26-23.el7.x86_64.rpm
-    state: installed
+#- name: Create mysql group
+#  group: name=cacheuser system=yes
 
-- name: Download and Install SQL nodes
-  yum:
-    name: mysql-cluster-community-server
-    state: present
-    update_cache: yes
+#- name: Create myslq user
+#  user: name=cacheuser system=yes createhome=no group=cacheuser
 
-- name: Link binary directory to short name
-  command: ln -s /usr/local/mysql-cluster-gpl-7.5.13-linux-glibc2.12-x86_64 /usr/local/mysql creates=/usr/local/mysql
+# Create database privileges
+#- name: Create mysql cacheuser
+#  mysql_user:
+#    name: cacheuser
+#    password: 12345
+#    priv: '*.*:ALL'
+#    state: present
 
-- name: Install python-pip packages
-  yum:
-    name: ['python2-pip','python34-pip','python36-pip']
-    state: present
+#- name: Install mysql DB
+#  command: ./scripts/mysql_install_db --user=cacheuser chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
 
-- name: Pip install PyMySQL
-  pip:
-    name: PyMySQL
+#- name: Set permissions
+#  shell: chown -R cacheuser /usr/local/mysql/data && chgrp -R cacheuser /usr/local/mysql/
 
-- name: Create root mysql user
-  mysql_user:
-    name: root
-    password: 'root_passwd'
-    priv: '*.*:ALL'
-    state: present
+#- name: Install init file
+#  command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/ creates=/etc/init.d/mysql.server
 
-- name: Create cacheuser mysql user
-  mysql_user:
-    name: cacheuser
-    password: 'cache_passwd'
-    state: present
+#- name: Install config
+#  template: src=my.cnf dest=/etc/my.cnf
 
-# TESTing import cachecluster database
-- name: import Cachecluster database dump
-  mysql_db:
-    name: CacheCluster
-    state: import
-    target: /etc/ansible/mysql/CacheCluster_2019.sql
-    login_host: localhost
-    login_user: root
-    login_password: 'root_passwd'
-    delegate_to: "{{ groups['mysql_cluster_sql'] }}"
+#- name: Activate init script and start mysql server
+#  service: name=mysql.server enabled=yes state=started
 
-- name: Create mysql cacheuser
-  mysql_user:
-    name: cacheuser
-    password: 'cache_passwd'
-    priv: 'CacheCluster.*:ALL'
-    state: present
+#- name: Alter tables to allow user replication
+#  command: /usr/local/mysql/bin/mysql -e 'ALTER TABLE mysql.{{ item }} ENGINE=NDBCLUSTER;' creates=/usr/local/mysql/data/mysql/{{ item }}.ndb
+#  with_items:
+#  - user
+#  - db
+#  - tables_priv
+#  - columns_priv
+#  - procs_priv
+#  - proxies_priv
 
-- name: Install mysql DB
-  command: ./scripts/mysql_install_db --user=cacheuser chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
+# Create database privileges
+#- mysql_user:
+#    name: cacheuser
+#    password: 12345
+#    priv: '*.*:ALL'
+#    state: present
 
-- name: Set permissions
-  shell: chown -R cacheuser /usr/local/mysql/data && chgrp -R cacheuser /usr/local/mysql/
-
-- name: Install init file
-  command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/ creates=/etc/init.d/mysql.server
-
-- name: Install config
-  template:
-    src: my.cnf
-    dest: /etc/my.cnf
-
-- name: Activate init script and start mysql server
-  service:
-    name: mysql.server
-    enabled: yes
-    state: started
-
-- name: Alter tables to allow user replication
-  command: /usr/local/mysql/bin/mysql -e 'ALTER TABLE mysql.{{ item }} ENGINE=NDBCLUSTER;' creates=/usr/local/mysql/data/mysql/{{ item }}.ndb
-  with_items:
-  - user
-  - db
-  - tables_priv
-  - columns_priv
-  - procs_priv
-  - proxies_priv
+# TEST
+#- name: import Cachecluster database
+#  mysql_db:
+#    name: CacheCluster
+#    state: import
+#    target: /etc/ansible/mysql/CacheCluster_2019.sql
+#    login_host: localhost
+#    login_user: root
+#    login_password: '123456'
+#    delegate_to: "{{ groups['mysql_cluster_sql'] }}" # {{ item }}
+#    with_items:
+#      - "{{ groups['mysql_cluster_sql'] }}"

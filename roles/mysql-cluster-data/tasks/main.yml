@@ -1,40 +1,36 @@
-#- name: Download binaries
-#  command: wget --continue -P /var/tmp http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
-- name: Download binaries
-  get_url:
-    url: http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
-    dest: /var/tmp
-#    mode: '0440'
-
-- name: Extract binaries
+- name: Download and Extract Mysql Data Cluster binaries
   unarchive:
-    src: /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
-    dest: /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64
-
-#- name: Extract binaries
-#  command: tar -C /var/tmp -xzf /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz creates=/var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64
+    src: "http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"
+    dest: /var/tmp/
+    remote_src: yes
+  become: true
 
 - name: Install nbd binaries
   command: install /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64/bin/ndbd /usr/local/bin/ndbd
   args:
     creates: /usr/local/bin/ndbd
+  become: true
 
 - name: Install config
   template:
     src: my.cnf
     dest: /etc/my.cnf
+  become: true
 
 - name: Install init file
   copy:
     src: ndbd.init
     dest: /etc/init.d/ndbd
+  become: true
 
 - name: Activate init file
   service:
     name: ndbd
     enabled: yes
+  become: true
 
-- name: Initialize ndbd
-  command: /usr/local/mysql/bin/ndbd --initial
-  args:
-    creates: /usr/local/mysql/data/ndbinfo/
+#- name: Initialize ndbd
+#  command: "/usr/local/mysql/bin/ndbd --initial"
+#  args:
+#    creates: /usr/local/mysql/data/ndbinfo/
+#  become: true
