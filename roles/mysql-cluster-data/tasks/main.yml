@@ -29,8 +29,8 @@
     enabled: yes
   become: true
 
-#- name: Initialize ndbd
-#  command: "/usr/local/mysql/bin/ndbd --initial"
-#  args:
-#    creates: /usr/local/mysql/data/ndbinfo/
-#  become: true
+- name: Initialize ndbd
+  command: "/usr/local/mysql/bin/ndbd --initial"
+  args:
+    creates: /usr/local/mysql/data/ndbinfo/
+  become: true
