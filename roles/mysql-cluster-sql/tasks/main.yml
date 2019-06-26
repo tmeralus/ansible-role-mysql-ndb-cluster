@@ -11,12 +11,11 @@
     creates: /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64
   become: true
 
-#- name: Link binary directory to short name
-#  command: ln -s /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64 /usr/local/mysql
 - name: Create /usr/local/mysql directory
   file:
     path: /usr/local/mysql
     state: directory
+    mode: 0755
   become: true
 
 - name: Create symlink for /usr/local/mysql

@@ -34,17 +34,18 @@
   file:
     path: /var/lib/mysql-cluster
     state: directory
-  # mode: 0644
+    mode: 0755
   become: true
 
 - name: Copy config
   template:
     src: config.ini
     dest: /var/lib/mysql-cluster/config.ini
+    mode: 0755
   become: true
 
-#- name: Initialize ndb_mgmd
-#  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
-#  args:
-#    creates: /var/lib/mysql-cluster/ndb_1_cluster.log
-#  become: true
+- name: Initialize ndb_mgmd
+  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
+  args:
+    creates: /var/lib/mysql-cluster/ndb_1_cluster.log
+  become: true
