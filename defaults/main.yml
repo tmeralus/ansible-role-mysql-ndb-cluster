@@ -1,2 +1,2 @@
 ---
-# defaults file for test-role-1
+mysql_dl_url: "http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"

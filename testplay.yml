@@ -1,0 +1,20 @@
+- hosts: mysql_cluster_mgm
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/mysql-cluster-mgm.yml"
+
+- hosts: mysql_cluster_data
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/mysql-cluster-data.yml"
+
+- hosts: mysql_cluster_sql
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/mysql-cluster-sql.yml"

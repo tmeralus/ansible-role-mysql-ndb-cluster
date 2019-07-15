@@ -4,7 +4,7 @@
 - name: Extract binaries
   command: tar -C "{{ var_dir }}" -xzf "{{ var_dir }}/{{ mysql_dl_tar }}" creates={{ var_dir }}/{{ mysql_dl_tar_dir }}/
 
-- name: "Create mysql ndbd required dir"
+- name: "Create mysql ndbd reuqired dir"
   file:
    path: "{{item}}"
    state: directory
