@@ -23,12 +23,20 @@
 - name: Create myslq user
   user: name=mysql system=yes createhome=no group=mysql
 
+#- name: Install mysql DB
+#  command: ./scripts/mysql_install_db --user=mysql chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
+#
+#- name: Set permissions
+#  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
 - name: Install mysql DB
-  command: ./scripts/mysql_install_db --user=mysql chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
-- name: Set permissions
-  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
+  command: ./scripts/mysql_install_db --user=root
+  args:
+    chdir: /usr/local/mysql/
+    creates: /usr/local/mysql/data/mysql/user.frm
+
 - name: Install init file
   command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/ creates=/etc/init.d/mysql.server
+
 - name: Install config
   template: src=my.cnf dest=/etc/my.cnf
 - name: Activate init script and start mysql server
