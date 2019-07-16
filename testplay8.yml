@@ -3,23 +3,23 @@
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "tasks/mysql-cluster-mgm.yml"
+  - import_tasks: "tasks/mysql-cluster-mgm8.yml"
 
 - hosts: mysql_cluster_data
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "tasks/mysql-cluster-data.yml"
+  - import_tasks: "tasks/mysql-cluster-data8.yml"
 
 - hosts: mysql_cluster_sql
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "tasks/mysql-cluster-sql.yml"
+  - import_tasks: "tasks/mysql-cluster-sql8.yml"
 
-# Each NDB Cluster host computer must have the correct executable programs 
+# Each NDB Cluster host computer must have the correct executable programs
 # installed. A host running an SQL node must
 # have installed on it a MySQL Server binary (mysqld).
 # Management nodes require

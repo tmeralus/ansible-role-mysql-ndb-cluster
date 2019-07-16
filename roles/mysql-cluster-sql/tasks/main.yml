@@ -1,72 +1,84 @@
-
 - name: Install dependencies
   apt: pkg=libaio1
   when: ansible_distribution == "Debian"
+  become: true
 
 - name: Download binaries
   command: wget --continue -P "{{ var_dir }}" "{{ mysql_dl_url }}"
+  become: true
 
 - name: Extract binaries
   command: tar -C /usr/local -xzf {{ var_dir }}/{{ mysql_dl_tar }} creates="{{ mysql_dl_tar_dir }}"
+  become: true
 
 - name: "Create mysql ndbd required dir"
   file:
    path: "{{ mysql_dl_tar_dir }}"
    state: directory
    mode: 0644
+  become: true
 
 - name: Link binary directory to short name
   command: ln -s /usr/local/"{{ mysql_dl_tar_dir }}" /usr/local/mysql creates=/usr/local/mysql
+  become: true
 
 - name: Create mysql group
-  group: name=mysql system=yes
-- name: Create myslq user
-  user: name=mysql system=yes createhome=no group=mysql
+  group:
+    name: mysql
+    system: yes
+  become: true
 
-#- name: Install mysql DB
-#  command: ./scripts/mysql_install_db --user=mysql chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
-#
-#- name: Set permissions
-#  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
+- name: Create myslq user
+  user:
+    name: mysql
+    system: yes
+    createhome: no
+    group: mysql
+  become: true
+
+- name: Set permissions
+  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
+  become: true
+
+- name: "Create mysql ndbd required dir"
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0644
+  with_items:
+  - "/usr/local/mysql"
+  - "/usr/local/mysql/data"
+  - "/usr/local/mysql/data/mysql"
+  become: true
+
+- name: "Create /usr/local/mysql/data/mysql/user.frm"
+  file:
+   path: "/usr/local/mysql/data/mysql/user.frm"
+   state: touch
+   mode: 0644
+  become: true
+
 - name: Install mysql DB
   command: ./scripts/mysql_install_db --user=root
   args:
-    chdir: /usr/local/mysql/
-    creates: /usr/local/mysql/data/mysql/user.frm
+    chdir: "{{ mysql_dl_tar_dir }}/scripts/"
+  become: true
 
 - name: Install init file
-  command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/ creates=/etc/init.d/mysql.server
+  command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/
+  args:
+    creates: /etc/init.d/mysql.server
+  become: true
 
 - name: Install config
-  template: src=my.cnf dest=/etc/my.cnf
+  template:
+    src: my.cnf
+    dest: /etc/my.cnf
+  become: true
+
 - name: Activate init script and start mysql server
-  service: name=mysql.server enabled=yes state=started
-- name: Alter tables to allow user replication
-  command: /usr/local/mysql/bin/mysql -e 'ALTER TABLE mysql.{{ item }} ENGINE=NDBCLUSTER;' creates=/usr/local/mysql/data/mysql/{{ item }}.ndb
-  with_items:
-  - user
-  - db
-  - tables_priv
-  - columns_priv
-  - procs_priv
-  - proxies_priv
-
-#- name: Extract binaries
-#  command: tar -C /usr/local -xzf /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
-#  args:
-#    creates: /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64
-#  become: true
-#
-#- name: Create /usr/local/mysql directory
-#  file:
-#    path: /usr/local/mysql
-#    state: directory
-#    mode: 0755
-#  become: true
-
-#- name: Create symlink for /usr/local/mysql
-#  file:
-#    src: /usr/local/mysql-cluster-gpl-7.6.9-linux-glibc2.5-x86_64
-#    dest: /usr/local/mysql
-#    state: link
-#  become: true
+  service:
+    name: mysql.server
+    enabled: yes
+    state: started
+  become: true

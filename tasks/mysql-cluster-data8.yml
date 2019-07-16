@@ -1,0 +1,21 @@
+- name: Add Mysql Repo
+  template:
+    src: mysql-community-8.repo
+    dest: /etc/yum.repos.d/mysql-community-8.repo
+    mode: 0644
+  become: true
+
+- name: install mysql-cluster-community-data-node
+  yum:
+    name: mysql-cluster-community-data-node
+    state: present
+
+- name: Install config
+  template:
+    src: my.cnf
+    dest: /etc/my.cnf
+  become: true
+
+- name: Initialize ndb
+  command: ndbd
+  become: true
