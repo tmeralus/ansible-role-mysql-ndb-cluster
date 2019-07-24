@@ -1,0 +1,29 @@
+- hosts: mysql_cluster_sql
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/8/mysql-cluster-sql8.yml"
+
+- hosts: mysql_cluster_mgm
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/8/mysql-cluster-mgm8.yml"
+
+- hosts: mysql_cluster_data
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - import_tasks: "tasks/8/mysql-cluster-data8.yml"
+
+
+#    Management node: management-server
+#    Data node: data-node
+#    SQL node: server and common
+# Data nodes. shell> rpm -Uhv mysql-cluster-community-data-node-8.0.18-1.el7.x86_64.rpm
+# SQL nodes. shell> rpm -Uhv mysql-cluster-community-server-8.0.18-1.el7.x86_64.rpm
+# SQL nodes. shell> rpm -Uhv mysql-cluster-community-client-8.0.18-1.el7.x86_64.rpm
+# Management nodes.  shell> rpm -Uhv mysql-cluster-commercial-management-server-8.0.18-1.el7.x86_64.rpm

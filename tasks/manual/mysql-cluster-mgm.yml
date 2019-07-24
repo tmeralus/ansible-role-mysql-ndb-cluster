@@ -19,7 +19,7 @@
 
 - name: Activate init file
   service:
-    name: ndb_mgmd
+    name: ndb_mgmd -f /var/lib/mysql-cluster/config.ini
     enabled: yes
   become: true
 
@@ -38,18 +38,12 @@
   become: true
 
 # Firewalld task to connect data nodes
-- name: check if firewalld exists
-  stat:
-    path: /etc/sysconfig/firewalld
-  register: firewall_rules
-
-- name: add port 1186
-  firewalld:
-    port: 1186/tcp
-    zone: public
-    permanent: true
-    state: enabled
-  when: "firewall_rules.stat.exists == true"
+#- name: add port 1186
+#  firewalld:
+#    port: 1186/tcp
+#    zone: public
+#    permanent: true
+#    state: enabled
 
 - name: "[Firewall] add port 1186"
   iptables:
@@ -57,21 +51,6 @@
    protocol: tcp
    jump: ACCEPT
    destination_port: 1186
-  when: "firewall_rules.stat.exists == false"
-
-- name: Restart FirewallD
-  systemd:
-    name: firewalld
-    state: restarted
-  become: true
-  when: "firewall_rules.stat.exists == true"
-
-- name: Restart Iptables
-  systemd:
-    name: iptables
-    state: restarted
-  become: true
-  when: "firewall_rules.stat.exists == false"
 
 - name: Initialize ndb_mgmd
   command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/

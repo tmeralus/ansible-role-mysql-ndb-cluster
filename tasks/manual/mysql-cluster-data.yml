@@ -1,20 +1,17 @@
 - name: Download binaries
   command: wget --continue -P "{{ var_dir }}" "{{ mysql_dl_url }}"
-  become: true
 
 - name: Extract binaries
   command: tar -C "{{ var_dir }}" -xzf "{{ var_dir }}/{{ mysql_dl_tar }}" creates={{ var_dir }}/{{ mysql_dl_tar_dir }}/
-  become: true
 
-- name: "Create mysql ndbd required dir"
+- name: "Create mysql ndbd reuqired dir"
   file:
    path: "{{item}}"
    state: directory
    mode: 0644
   with_items:
   - "/usr/local/mysql/data/ndbinfo/"
-  - "/usr/local/bin/ndbd/"
-  become: true
+  - "/usr/local/bin/ndbd"
 
 - name: Copy nbd binaries
   copy:
@@ -33,7 +30,6 @@
     mode: 0775
     state: directory
     recurse: yes
-  become: true
 
 - name: Install config
   template:

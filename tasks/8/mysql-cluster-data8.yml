@@ -8,6 +8,7 @@
 - name: install mysql-cluster-community-data-node
   yum:
     name: mysql-cluster-community-data-node
+    #name: mysql-cluster-community-data-node-8.0.18-1
     state: present
 
 - name: Install config

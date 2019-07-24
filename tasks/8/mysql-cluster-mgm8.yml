@@ -10,7 +10,7 @@
     name: mysql-cluster-community-management-server
     state: present
 
-#- name: install  mysql-cluster-community-ndbclien
+#- name: install  mysql-cluster-community-ndbclient
 #  yum:
 #    name: mysql-cluster-community-ndbclient
 #    state: present
@@ -54,7 +54,7 @@
     dest: /var/lib/mysql-cluster/config.ini
     mode: 0755
   become: true
-  
+
 - name: Initialize ndb_mgmd
   command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
   args:

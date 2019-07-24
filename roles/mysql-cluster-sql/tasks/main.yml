@@ -36,9 +36,9 @@
     group: mysql
   become: true
 
-- name: Set permissions
-  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
-  become: true
+#- name: Set permissions
+#  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
+#  become: true
 
 - name: "Create mysql ndbd required dir"
   file:
@@ -59,7 +59,7 @@
   become: true
 
 - name: Install mysql DB
-  command: ./scripts/mysql_install_db --user=root
+  command: ./mysql_install_db --user=root --base-dir=
   args:
     chdir: "{{ mysql_dl_tar_dir }}/scripts/"
   become: true

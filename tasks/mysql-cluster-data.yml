@@ -1,35 +1,14 @@
-- name: Download binaries
-  command: wget --continue -P "{{ var_dir }}" "{{ mysql_dl_url }}"
-
-- name: Extract binaries
-  command: tar -C "{{ var_dir }}" -xzf "{{ var_dir }}/{{ mysql_dl_tar }}" creates={{ var_dir }}/{{ mysql_dl_tar_dir }}/
-
-- name: "Create mysql ndbd reuqired dir"
-  file:
-   path: "{{item}}"
-   state: directory
-   mode: 0644
-  with_items:
-  - "/usr/local/mysql/data/ndbinfo/"
-  - "/usr/local/bin/ndbd"
-
-- name: Copy nbd binaries
-  copy:
-    src: "{{ mysql_var_dir }}/"
-    dest: "/usr/local/bin/ndbd/"
-    owner: root
-    group: root
-    remote_src: yes
+- name: Add Mysql Repo
+  template:
+    src: mysql-community-7.repo
+    dest: /etc/yum.repos.d/mysql-community.repo
+    mode: 0644
   become: true
 
-- name: Fix '/usr/local/bin/ndbd/' permissions
-  file:
-    path: /usr/local/bin/ndbd/
-    owner: root
-    group: root
-    mode: 0775
-    state: directory
-    recurse: yes
+- name: install mysql-cluster-community-data-node
+  yum:
+    name: mysql-cluster-community-data-node
+    state: present
 
 - name: Install config
   template:
@@ -37,18 +16,6 @@
     dest: /etc/my.cnf
   become: true
 
-- name: Install init file
-  copy:
-    src: ndbd.init
-    dest: /etc/init.d/ndbd
-  become: true
-
-- name: Activate init file
-  service:
-    name: ndbd
-    enabled: yes
-  become: true
-
-- name: Initialize ndbd
-  shell: "/usr/local/bin/ndbd/ndbd --initial"
+- name: Initialize ndb
+  command: ndbd --initial
   become: true

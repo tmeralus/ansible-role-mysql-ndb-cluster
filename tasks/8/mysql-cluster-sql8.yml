@@ -5,9 +5,9 @@
     mode: 0644
   become: true
 
-- name: install mysql-cluster-community-management-server
+- name: install mysql-cluster-community-server
   yum:
-    name: mysql-cluster-community-ndbclient
+    name: mysql-cluster-community-client
     state: present
 
 # shell> rpm -Uhv mysql-cluster-community-server-8.0.18-1.el7.x86_64.rpm
