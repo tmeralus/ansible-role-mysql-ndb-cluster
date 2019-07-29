@@ -1,6 +1,6 @@
 - name: Add Mysql Repo
   template:
-    src: mysql-community-7.repo
+    src: mysql-community.repo.j2
     dest: /etc/yum.repos.d/mysql-community.repo
     mode: 0644
   become: true
@@ -22,20 +22,20 @@
     path: /etc/sysconfig/firewalld
   register: firewall_rules
 
-- name: add port 1186
+- name: "Add port {{ mysql_ndb_port }}"
   firewalld:
-    port: 1186/tcp
+    port: "{{ mysql_ndb_port }}/tcp"
     zone: public
     permanent: true
     state: enabled
   when: "firewall_rules.stat.exists == true"
 
-- name: "[Firewall] add port 1186"
+- name: "[Firewall] add port {{ mysql_ndb_port }}"
   iptables:
    chain: INPUT
    protocol: tcp
    jump: ACCEPT
-   destination_port: 1186
+   destination_port: "{{ mysql_ndb_port }}"
   when: "firewall_rules.stat.exists == false"
 
 - name: Restart FirewallD
@@ -46,17 +46,18 @@
   when: "firewall_rules.stat.exists == true"
 # END FIREWALL
 
-- name: Copy config
+- name: Copy config.ini to /var/lib/mysql-cluster/
   template:
-    src: config.ini
+    src: config.ini.j2
     dest: /var/lib/mysql-cluster/config.ini
     mode: 0755
   become: true
 
-#- name: Initialize ndb_mgmd
-#  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
-#  become: true
-
 - name: Initialize ndb_mgmd
-  command: ndb_mgmd 
+  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
   become: true
+  ignore_errors: true
+
+#- name: Initialize ndb_mgmd
+#  command: ndb_mgmd
+#  become: true

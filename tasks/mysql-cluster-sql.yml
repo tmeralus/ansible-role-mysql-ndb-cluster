@@ -1,6 +1,6 @@
 - name: Add Mysql Repo
   template:
-    src: mysql-community-7.repo
+    src: mysql-community.repo.j2
     dest: /etc/yum.repos.d/mysql-community.repo
     mode: 0644
   become: true
@@ -13,22 +13,7 @@
 
 - name: Install config
   template:
-    src: my.cnf
+    src: my.cnf.j2
     dest: /etc/my.cnf
   become: true
-
-- name: Start and Enable Mysql
-  service:
-    name: mysql
-    state: started
-    enabled: true
-
-#mysql_secure_installation
-# run mysqld as mysql user
-# Can't open the mysql.plugin table
-# Please run mysql_upgrade to create it.
-
-
-#- name: Initialize ndb
-#  command: ndbd --config
-#  become: true
+ 

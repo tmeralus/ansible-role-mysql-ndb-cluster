@@ -1,7 +1,7 @@
 [ndbd default]
 # Options affecting ndbd processes on all data nodes:
 NoOfReplicas=1    # Number of replicas
-DataMemory=4096M    # How much memory to allocate for data storage
+DataMemory={{ config_data_mem }}    # How much memory to allocate for data storage
 #IndexMemory=128M   # How much memory to allocate for index storage
 
 # For DataMemory and IndexMemory, we have used the
@@ -13,7 +13,7 @@ DataMemory=4096M    # How much memory to allocate for data storage
 {% if hostvars[host]["mysql_cluster"] == mysql_cluster %}
 [ndb_mgmd]
 hostname={{ host }}
-datadir=/var/lib/mysql-cluster
+datadir={{ ndb_mgmd_data_dir }}
 {% endif %}
 {% endfor %}
 
@@ -21,7 +21,7 @@ datadir=/var/lib/mysql-cluster
 {% if hostvars[host]["mysql_cluster"] == mysql_cluster %}
 [ndbd]
 HostName={{ host }}
-datadir=/usr/local/mysql/data
+datadir={{ config_data_dir }}
 {% endif %}
 {% endfor %}
 

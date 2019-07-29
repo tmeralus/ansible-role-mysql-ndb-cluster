@@ -2,28 +2,27 @@
   become: yes
   become_user: root
   become_method: sudo
-  roles:
-  - mysql-cluster-mgm
+  tasks:
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-mgm.yml"
 
 - hosts: mysql_cluster_data
   become: yes
   become_user: root
   become_method: sudo
-  roles:
-  - mysql-cluster-data
+  tasks:
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-data.yml"
 
 - hosts: mysql_cluster_sql
   become: yes
   become_user: root
   become_method: sudo
-  roles:
-  - mysql-cluster-sql
-
-
-# fix mysql-cluster-mgm template with node=id
-#  create systemd script   name: ndb_mgmd
-# fix mysql-cluster-data Initialize ndbd
-# fix mysql sql symlink
-
-# inspiration
-# https://github.com/mdom/ansible-mysql-cluster/blob/master/roles/mysql-cluster-sql/tasks/main.yml
+  tasks:
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-sql.yml"
+#  - import_tasks: "tasks/secure_installation.yml"
+#  - import_tasks: "tasks/configure.yml"

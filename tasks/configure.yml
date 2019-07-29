@@ -1,0 +1,57 @@
+---
+# Configure Users
+- name: Add MySQL users
+  mysql_user:
+    name: "{{ item.name }}"
+    host: "{{ item.host | default('localhost') }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.priv | default('*.*:ALL') }}"
+    state: "{{ item.state | default('present') }}"
+#    append_privs: "{{ item.append_privs | default('no') }}"
+#    encrypted: "{{ item.encrypted | default('no') }}"
+  with_items: "{{ mysql_users }}"
+  no_log: true
+
+# Configure Database
+- name: Add MySQL databases
+  mysql_db:
+    name: "{{ item.name }}"
+#    collation: "{{ item.collation | default('utf8_general_ci') }}"
+#    encoding: "{{ item.encoding | default('utf8') }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ mysql_databases }}"
+
+- name: Import Custom Databases
+  mysql_db:
+    name: dbname
+    login_user: {{ mysql_root_user }}
+    login_password: {{ mysql_root_password }}
+    target: /etc/ansible/mysql/CacheCluster_2019.sql
+    state: import
+  when: mysql_import_db == 'yes'
+
+- name: Copy my.cnf global MySQL configuration.
+  template:
+    src: my.cnf.j2
+    dest: "{{ mysql_config_file }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: "{{ overwrite_global_mycnf }}"
+  notify: restart mysql
+
+- name: Copy my.cnf override files into include directory.
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ mysql_config_include_dir }}/{{ item.src | basename }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: "{{ item.force | default(False) }}"
+  with_items: "{{ mysql_config_include_files }}"
+  notify: restart mysql
+
+
+- name: Ensure MySQL is started and enabled on boot.
+  service: "name={{ mysql_daemon }} state=started enabled={{ mysql_enabled_on_startup }}"
+  register: mysql_service_configuration
