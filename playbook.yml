@@ -26,3 +26,12 @@
   - import_tasks: "tasks/mysql-cluster-sql.yml"
 #  - import_tasks: "tasks/secure_installation.yml"
 #  - import_tasks: "tasks/configure.yml"
+
+- hosts: mysql_cluster_mgm
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/instructions.yml"

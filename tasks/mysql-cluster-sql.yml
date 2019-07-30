@@ -5,6 +5,9 @@
     mode: 0644
   become: true
 
+# This installs a list of packages and
+# creates the mysql user
+# https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-install-linux-rpm.html
 - name: Install mysql-cluster-community-server
   yum:
     name: mysql-cluster-community-server
@@ -16,4 +19,11 @@
     src: my.cnf.j2
     dest: /etc/my.cnf
   become: true
- 
+
+#- import_tasks: secure_installation.yml 
+
+- name: Start and Enable Mysql
+  service:
+    name: mysqld
+    state: started
+    enabled: true

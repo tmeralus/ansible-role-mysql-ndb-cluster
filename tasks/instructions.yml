@@ -1,0 +1,7 @@
+---
+- name: Check NDB Cluster
+  command: ndb_mgmd
+  become: true
+  register: ndb_check
+
+- debug: msg="{{ ndb_check.stdout }}"

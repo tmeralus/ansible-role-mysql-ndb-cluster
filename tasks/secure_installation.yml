@@ -1,9 +1,11 @@
 ---
-- name: Start and Enable Mysql
-  service:
-    name: mysql
-    state: started
-    enabled: true
+#- name: Start and Enable Mysql
+#  service:
+#    name: mysqld
+#    state: started
+#    enabled: true
+
+#/opt/local/share/mysql5/mysql/mysql.server start --skip-grant-tables
 
 # Need to do this for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
@@ -12,13 +14,6 @@
     name: root
     host: localhost
     password: {{ mysql_root_passwd }}
-
-- name: copy .my.cnf file with root password credentials
-  template:
-    src: templates/root/.my.cnf
-    dest: /root/.my.cnf
-    owner: root
-    mode: 0600
 
 - name: update mysql root password for all root accounts
   mysql_user:
@@ -43,72 +38,3 @@
   mysql_db:
     name: test
     state: absent
-
-
-#- name: Change mysql root password
-#  command: mysqladmin -u root password {{ mysql_root_passwd }}
-#  become: true
-
-#- name: mysql_secure_installation steps
-#  expect:
-#    command: mysql_secure_installation
-#    responses:
-#      Question:
-#        - {{ mysql_root_passwd }}
-#        - response2
-#        - response3
-
-#- name: Copy my.cnf override files into include directory.
-#  template:
-#    src: "{{ item.src }}"
-#    dest: "{{ mysql_config_include_dir }}/{{ item.src | basename }}"
-#    owner: root
-#    group: root
-#    mode: 0644
-#    force: "{{ item.force | default(False) }}"
-#  with_items: "{{ mysql_config_include_files }}"
-#  notify: restart mysql
-
-# Has to be after the password assignment, for idempotency.
-#- name: Copy user-my.cnf file with password credentials.
-#  template:
-#    src: "user-my.cnf.j2"
-#    dest: "{{ mysql_root_home }}/.my.cnf"
-#    owner: "{{ mysql_root_username }}"
-#    mode: 0600
-
-
-# sudo /usr/sbin/mysqld --skip-grant-tables --skip-networking &
-#- name: Initialize ndb
-#  command: ndbd --initial
-#  become: true
-#  ignore_errors: true
-
-
-#- name: Ensure default user is present.
-#  mysql_user:
-#    name: "{{ mysql_root_username }}"
-#    host: 'localhost'
-#    password: ""
-#    priv: '*.*:ALL,GRANT'
-#    state: present
-
-#- name: update mysql root password
-#  mysql_user:
-#    name: "{{ mysql_root_username }}"
-#    host: 'localhost'
-#    password: "{{ mysql_root_changed_passwd }}"
-#    priv: '*.*:ALL,GRANT'
-#    state: present
-
-#- name: Remove anonymous MySQL users.
-#  mysql_user:
-#    name: ""
-#    host: "{{ item }}"
-#    state: absent
-#  with_items: "{{ mysql_anonymous_hosts.stdout_lines|default([]) }}"
-
-#- name: Remove MySQL test database.
-#  mysql_db: "
-#    name: 'test'
-#    state: absent"
