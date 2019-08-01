@@ -1,5 +1,5 @@
 ---
-mysql_version: 7.6
+mysql_version: 8.0
 config_data_mem: 4096M
 config_data_dir: "/usr/local/mysql/data"
 ndb_mgmd_data_dir: "/var/lib/mysql-cluster"

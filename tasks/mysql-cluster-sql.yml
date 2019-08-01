@@ -20,10 +20,10 @@
     dest: /etc/my.cnf
   become: true
 
-#- import_tasks: secure_installation.yml 
+#- import_tasks: secure_installation.yml
 
-- name: Start and Enable Mysql
-  service:
-    name: mysqld
-    state: started
-    enabled: true
+#- name: Start and Enable Mysql
+#  service:
+#    name: mysqld
+#    state: started
+#    enabled: true

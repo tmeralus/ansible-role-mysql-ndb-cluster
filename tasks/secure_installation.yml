@@ -1,4 +1,14 @@
 ---
+- name: Find mysql temporary password
+  command: "grep "temporary password" /var/log/mysqld.log"
+  become: true
+  register: grep_output
+
+- debug:
+    var: grep_output.stdout_lines
+
+#sudo grep "temporary password" /var/log/mysqld.log
+
 #- name: Start and Enable Mysql
 #  service:
 #    name: mysqld
@@ -9,32 +19,32 @@
 
 # Need to do this for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
-- name: update mysql root password for all root accounts
-  mysql_user:
-    name: root
-    host: localhost
-    password: {{ mysql_root_passwd }}
+#- name: update mysql root password for all root accounts
+#  mysql_user:
+#    name: root
+#    host: localhost
+#    password: {{ mysql_root_passwd }}
 
-- name: update mysql root password for all root accounts
-  mysql_user:
-    name: root
-    host: {{ item }}
-    password: {{ root_db_password }}
-  with_items:
-    - {{ ansible_hostname }}
-    - 127.0.0.1
-    - ::1
+#- name: update mysql root password for all root accounts
+#  mysql_user:
+#    name: root
+#    host: {{ item }}
+#    password: {{ root_db_password }}
+#  with_items:
+#    - {{ ansible_hostname }}
+#    - 127.0.0.1
+#    - ::1
 
-- name: ensure anonymous users are not in the database
-  mysql_user:
-    name: ''
-    host: {{ item }}
-    state: absent
-  with_items:
-    - localhost
-    - {{ inventory_hostname }}
+#- name: ensure anonymous users are not in the database
+#  mysql_user:
+#    name: ''
+#    host: {{ item }}
+#    state: absent
+#  with_items:
+#    - localhost
+#    - {{ inventory_hostname }}
 
-- name: remove the test database
-  mysql_db:
-    name: test
-    state: absent
+#- name: remove the test database
+#  mysql_db:
+#    name: test
+#    state: absent

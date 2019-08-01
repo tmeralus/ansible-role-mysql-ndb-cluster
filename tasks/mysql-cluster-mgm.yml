@@ -58,6 +58,8 @@
   become: true
   ignore_errors: true
 
+# ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
+
 #- name: Initialize ndb_mgmd
 #  command: ndb_mgmd
 #  become: true

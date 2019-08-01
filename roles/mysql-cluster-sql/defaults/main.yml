@@ -1,6 +1,0 @@
----
-mysql_dl_url: "http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"
-mysql_dl_tar: "mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz"
-mysql_dl_tar_dir: "usr/local/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64"
-mysql_var_dir: "/var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64/bin"
-var_dir: "/var/tmp"

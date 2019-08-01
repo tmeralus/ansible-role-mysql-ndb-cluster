@@ -1,0 +1,19 @@
+- hosts: mysql_cluster_mgm
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - name: Copy config.ini to /var/lib/mysql-cluster/
+    template:
+      src: config.ini.j2
+      dest: /var/lib/mysql-cluster/config.ini
+      mode: 0755
+    become: true
+  - name: Initialize ndb_mgmd
+    command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
+    become: true
+    ignore_errors: true
+# ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/
+#  - import_tasks: "tasks/mysql-cluster-mgm.yml"
