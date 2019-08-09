@@ -14,16 +14,19 @@
     state: present
   become: true
 
+- name: Create mysql log file
+  file:
+    path: /var/log/mysqld.log
+    owner: mysql
+    group: mysql
+    mode: 0644
+  become: true
+
 - name: Install config
   template:
-    src: my.cnf.j2
+    src: sqlnode.cnf.j2
     dest: /etc/my.cnf
   become: true
 
-#- import_tasks: secure_installation.yml
-
-#- name: Start and Enable Mysql
-#  service:
-#    name: mysqld
-#    state: started
-#    enabled: true
+# Setting up Mysql secure connection
+- import_tasks: "secure.yml"

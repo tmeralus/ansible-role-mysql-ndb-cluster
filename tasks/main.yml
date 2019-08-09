@@ -18,12 +18,10 @@
   become_method: sudo
   tasks:
   - import_tasks: "mysql-cluster-sql.yml"
-  - import_tasks: "secure_installation.yml"
-  - import_tasks: "configure.yml"
 
-- hosts: mysql_cluster_mgm
-  become: yes
-  become_user: root
-  become_method: sudo
-  tasks:
-  - import_tasks: "instructions.yml"
+#- hosts: mysql_cluster_mgm
+#  become: yes
+#  become_user: root
+#  become_method: sudo
+#  tasks:
+#  - import_tasks: "instructions.yml"

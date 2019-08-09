@@ -26,7 +26,7 @@
     name: dbname
     login_user: {{ mysql_root_user }}
     login_password: {{ mysql_root_password }}
-    target: /etc/ansible/mysql/CacheCluster_2019.sql
+    target: "{{ mysql_custom_db }}"
     state: import
   when: mysql_import_db == 'yes'
 

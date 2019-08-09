@@ -1,0 +1,49 @@
+- name: mysqld --log-error --skip-syslog as MYSQL user
+  command: mysqld --log-error --skip-syslog
+  become: yes
+  become_user: mysql
+
+- name: Find mysql temporary password
+  command: egrep "temporary password" /var/log/mysqld.log
+  register: temp_passwd
+
+- debug:
+    msg: "{{ temp_passwd.stdout_lines }}"
+
+#- name: mysqld flush privileges
+#  command: mysqld flush privileges
+#  become_user: mysql
+
+#===========================================
+# find temporary password
+#- name: Find mysql temporary password
+#  lineinfile:
+#    dest: /var/log/mysqld.log
+#    line: "temporary password"
+#  check_mode: yes
+#  register: temp_passwd
+
+#- debug:
+#    msg: "{{ temp_passwd.stdout_lines }}"
+
+#===============================================
+# change mysql user password
+#- name: Change mysql root user
+#  command: mysqld ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_root_passwd }}';
+#  become_user: mysql
+#  no_log: true
+
+#[Server] A temporary password is generated for root@localhost: eVxsVe38:3=H
+
+#=============================================================
+#- name: Removes anonymous user account for localhost
+#  mysql_user:
+#    name: ''
+#    host: localhost
+#    state: absent
+
+#- name: Start and Enable Mysql
+#  service:
+#    name: mysqld
+#    state: started
+#    enabled: true

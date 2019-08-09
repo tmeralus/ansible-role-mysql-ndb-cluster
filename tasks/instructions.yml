@@ -5,3 +5,5 @@
   register: ndb_check
 
 - debug: msg="{{ ndb_check.stdout }}"
+- debug: msg=" mysql root password is {{ ndb_check.stdout }}"
+- debug: msg=" run ndb_mgmd on the management node to test connections"

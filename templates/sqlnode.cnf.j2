@@ -2,7 +2,7 @@
 ndbcluster
 max_connections={{ cnf_max_connections }}
 performance_schema={{ cnf_performance_schema }}
- 
+log-error=/var/log/mysqld.log
 
 [mysql_cluster]
 ndb-connectstring={{ groups['mysql_cluster_mgm'] | join(",") }}
