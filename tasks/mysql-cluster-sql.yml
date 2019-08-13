@@ -27,6 +27,4 @@
     src: sqlnode.cnf.j2
     dest: /etc/my.cnf
   become: true
-
-# Setting up Mysql secure connection
-- import_tasks: "secure.yml"
+ 

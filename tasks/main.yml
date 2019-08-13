@@ -3,25 +3,25 @@
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "mysql-cluster-mgm.yml"
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-mgm.yml"
 
 - hosts: mysql_cluster_data
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "mysql-cluster-data.yml"
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-data.yml"
 
 - hosts: mysql_cluster_sql
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-  - import_tasks: "mysql-cluster-sql.yml"
-
-#- hosts: mysql_cluster_mgm
-#  become: yes
-#  become_user: root
-#  become_method: sudo
-#  tasks:
-#  - import_tasks: "instructions.yml"
+  - name: Include OS-specific variables.
+    include_vars: "{{ playbook_dir }}/defaults/main.yml"
+  - import_tasks: "tasks/mysql-cluster-sql.yml"
+  - import_tasks: "tasks/instructions.yml"

@@ -1,9 +1,5 @@
 ---
-- name: Check NDB Cluster
-  command: ndb_mgmd
-  become: true
-  register: ndb_check
-
-- debug: msg="{{ ndb_check.stdout }}"
-- debug: msg=" mysql root password is {{ ndb_check.stdout }}"
-- debug: msg=" run ndb_mgmd on the management node to test connections"
+- debug: msg="Mysql cluster has been setup"
+- debug: msg="please run the following command on the sql nodes"
+- debug: msg="to find the root password for Mysql running on those nodes"
+- debug: msg=" mysqld --log-error --skip-syslog"
