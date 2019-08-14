@@ -2,7 +2,6 @@
 ndbcluster
 max_connections={{ cnf_max_connections }}
 performance_schema={{ cnf_performance_schema }}
- 
 
 [mysql_cluster]
-ndb-connectstring={{ groups['mysql_cluster_mgm'] | join(",") }}
+ndb-connectstring={{ groups['ndb_cluster_mgm'] | join(",") }}

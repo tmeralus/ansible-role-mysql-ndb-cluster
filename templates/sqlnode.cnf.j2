@@ -5,4 +5,10 @@ performance_schema={{ cnf_performance_schema }}
 log-error=/var/log/mysqld.log
 
 [mysql_cluster]
-ndb-connectstring={{ groups['mysql_cluster_mgm'] | join(",") }}
+ndb-connectstring={{ groups['ndb_cluster_mgm'] | join(",") }}
+
+{% for host in groups["ndb_cluster_mgm"] %} 
+[ndb_mgmd]
+hostname={{ host }}
+datadir=/var/lib/mysql-cluster
+{% endfor %}

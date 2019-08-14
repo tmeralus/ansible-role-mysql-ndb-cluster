@@ -1,7 +1,11 @@
+# Boca template
 [ndbd default]
 # Options affecting ndbd processes on all data nodes:
 NoOfReplicas= 2   # Number of replicas
 
+#{% for host in groups["ndb_cluster_data"] %}
+#NoOfReplicas= {{ loop.index }}   # Number of replicas
+#{% endfor %}
 
 # Options are deprecated in mysql cluster 8.0
 #DataMemory=4096M    # How much memory to allocate for data storage
@@ -11,18 +15,19 @@ NoOfReplicas= 2   # Number of replicas
 [ndb_mgmd]
 HostName={{ host }}
 DataDir=/var/lib/mysql-cluster
-
 {% endfor %}
 
 {% for host in groups["ndb_cluster_data"] %}
 [ndbd]
 HostName={{ host }}
 DataDir=/usr/local/mysql/data
+#{% if hostvars[host]["node_id"] %}
+#NodeId={{ loop.index }}
+#{% endif %}
 
 {% endfor %}
 
 {% for host in groups["ndb_cluster_sql"] %}
 [mysqld]
 HostName= {{ host }}
-
 {% endfor %}

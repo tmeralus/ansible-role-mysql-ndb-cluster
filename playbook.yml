@@ -1,4 +1,4 @@
-- hosts: mysql_cluster_mgm
+- hosts: ndb_cluster_mgm
   become: yes
   become_user: root
   become_method: sudo
@@ -7,7 +7,7 @@
     include_vars: "{{ playbook_dir }}/defaults/main.yml"
   - import_tasks: "tasks/mysql-cluster-mgm.yml"
 
-- hosts: mysql_cluster_data
+- hosts: ndb_cluster_data
   become: yes
   become_user: root
   become_method: sudo
@@ -16,7 +16,7 @@
     include_vars: "{{ playbook_dir }}/defaults/main.yml"
   - import_tasks: "tasks/mysql-cluster-data.yml"
 
-- hosts: mysql_cluster_sql
+- hosts: ndb_cluster_sql
   become: yes
   become_user: root
   become_method: sudo
