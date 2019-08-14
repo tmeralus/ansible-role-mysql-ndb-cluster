@@ -9,6 +9,16 @@
   yum:
     name: mysql-cluster-community-data-node
     state: present
+  become: true
+
+- name: Recursively change ownership of /usr/local/mysql/data/
+  file:
+    path: /usr/local/mysql/data
+    state: directory
+    recurse: yes
+    owner: mysql
+    group: mysql
+  become: true
 
 - name: Install config
   template:

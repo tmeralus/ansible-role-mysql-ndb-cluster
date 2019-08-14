@@ -1,0 +1,66 @@
+# Set system env for mysql
+#- name: Set the mySQL environment option
+#  command: "systemctl set-environment MYSQLD_OPTS="--skip-grant-tables" "
+
+- name: Set the MySQL environment option
+  shell: "echo $MY_ENV_VARIABLE"
+  environment:
+    MYSQLD_OPTS: "--skip-grant-tables"
+  become: true
+
+# Start mysql usig the preset options
+- name: Start MySQLD
+  systemd:
+    name: mysqld
+    state: started
+  become: true
+
+- name: Change root user password
+  mysql_user:
+    #login_user: root
+    name: root
+    password: "{{ mysql_root_passwd }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: true
+
+#As mentioned my shokulei in the comments, for 5.7.6 and later, you should use
+#   mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass';
+#Or you'll get a warning
+
+#mysql> FLUSH PRIVILEGES;
+#ysql> quit
+
+#- name: Change root user password
+#  command: /usr/local/mysql/bin/mysql -e 'ALTER TABLE mysql.{{ item }} ENGINE=NDBCLUSTER;'
+
+- name: Removes anonymous user account for localhost
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_passwd }}"
+    name: ''
+    host: localhost
+    state: absent
+  become: true
+
+ # Stop mysql
+- name: Stop MySQLD
+  systemd:
+    name: mysqld
+    state: stopped
+  become: true
+
+# Unset the mySQL envitroment option so it starts normally next time
+- name: Unset the mySQL environment option
+  command: "systemctl unset-environment MYSQLD_OPTS"
+  become: true
+
+# Stop mysql
+- name: Start mysql
+  systemd:
+    name: mysqld
+    state: started
+  become: true
+
+# Once completed print instructions
+- import_tasks: "tasks/instructions.yml"
