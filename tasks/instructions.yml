@@ -1,3 +1,0 @@
----
-- debug: msg="Mysql cluster has been setup"
-- debug: msg="Start the mgm node, then data nodes, then sql node in that order"

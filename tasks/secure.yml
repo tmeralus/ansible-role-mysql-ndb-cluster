@@ -61,6 +61,3 @@
     name: mysqld
     state: started
   become: true
-
-# Once completed print instructions
-- import_tasks: "tasks/instructions.yml"
