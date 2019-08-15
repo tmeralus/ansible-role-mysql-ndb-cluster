@@ -9,11 +9,6 @@
   yum:
     name: mysql-cluster-community-management-server
     state: present
-
-- name: Install mysql-cluster-community-server
-  yum:
-    name: mysql-cluster-community-server
-    state: present
   become: true
 
 # Firewalld task to connect data nodes
@@ -51,6 +46,13 @@
     src: config.ini.j2
     dest: /var/lib/mysql-cluster/config.ini
     mode: 0755
+  become: true
+
+- name: Copy my.cnf to /var/lib/mysql-cluster/
+  template:
+    src: "my.cnf.j2"
+    dest: /etc/my.cnf
+    mode: 0644
   become: true
 
 - name: Set permissions for mysql data dir

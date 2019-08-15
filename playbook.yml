@@ -23,4 +23,5 @@
   tasks:
   - name: Include OS-specific variables.
     include_vars: "{{ playbook_dir }}/defaults/main.yml"
-  - import_tasks: "tasks/mysql-cluster-sql.yml" 
+  - import_tasks: "tasks/mysql-cluster-sql.yml"
+ 
