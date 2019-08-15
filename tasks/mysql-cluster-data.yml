@@ -11,20 +11,21 @@
     state: present
   become: true
 
-- name: Recursively change ownership of /usr/local/mysql/data/
-  file:
-    path: /usr/local/mysql/data
-    state: directory
-    recurse: yes
-    owner: mysql
-    group: mysql
-  become: true
-
-- name: Install config
+- name: Install config BOCA
   template:
-    src: my.cnf.j2
+    src: "my.cnf.j2"
     dest: /etc/my.cnf
+    mode: 0644
   become: true
+  when: scope != "atl"
+
+- name: Install config ATL
+  template:
+    src: "atl/my.cnf.j2"
+    dest: /etc/my.cnf
+    mode: 0644
+  become: true
+  when: scope == "atl"
 
 - name: Initialize ndb
   command: ndbd --initial

@@ -15,11 +15,6 @@
   command: "pip install --upgrade pip"
   become: true
 
-#- name: Install the Python MySQLB module dependancy
-#  pip:
-#    name: MySQL-python #==1.2.5
-#  become: true
-
 # This installs a list of packages and
 # creates the mysql user
 # https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-install-linux-rpm.html
@@ -37,35 +32,9 @@
     mode: 0644
   become: true
 
-# Firewalld task to connect data nodes
-- name: check if firewalld exists
-  stat:
-    path: /etc/sysconfig/firewalld
-  register: firewall_rules
-
-- name: "Add port {{ mysql_port }}"
-  firewalld:
-    port: "{{ mysql_port }}/tcp"
-    zone: public
-    permanent: true
-    state: enabled
-  when: "firewall_rules.stat.exists == true"
-
-- name: "[Firewall] add port {{ mysql_port }}"
-  iptables:
-   chain: INPUT
-   protocol: tcp
-   jump: ACCEPT
-   destination_port: "{{ mysql_port }}"
-  when: "firewall_rules.stat.exists == false"
-
-- name: Restart FirewallD
-  systemd:
-    name: firewalld
-    state: restarted
-  become: true
-  when: "firewall_rules.stat.exists == true"
-# END FIREWALL
+- import_tasks: firewall.yml
+  vars:
+    mysql_custom_port: "{{ mysql_port }} "
 
 - name: Set permissions for mysql data dir
   file:
@@ -75,11 +44,21 @@
     recurse: yes
     mode: 0755
 
-- name: Install config
+- name: Install config BOCA
   template:
-    src: my.cnf.j2
+    src: "my.cnf.j2"
     dest: /etc/my.cnf
+    mode: 0644
   become: true
+  when: scope != "atl"
+
+- name: Install config ATL
+  template:
+    src: "atl/my.cnf.j2"
+    dest: /etc/my.cnf
+    mode: 0644
+  become: true
+  when: scope == "atl"
 
 # Setting up Mysql secure connection
 - import_tasks: "secure.yml"
