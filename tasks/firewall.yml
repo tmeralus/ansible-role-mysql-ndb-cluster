@@ -3,6 +3,7 @@
   stat:
     path: /etc/sysconfig/firewalld
   register: firewall_rules
+  when: ansible_connection != 'docker'
 
 - name: "Add port {{ mysql_custom_port }}"
   firewalld:
@@ -10,20 +11,19 @@
     zone: public
     permanent: true
     state: enabled
-  when: "firewall_rules.stat.exists == true"
+  when: "firewall_rules.stat.exists == true and ansible_connection != 'docker' "
 
-- name: "[Firewall] add port {{ mysql_custom_port }}"
+- name: "add iptable port {{ mysql_custom_port }}"
   iptables:
    chain: INPUT
    protocol: tcp
    jump: ACCEPT
    destination_port: "{{ mysql_custom_port }}"
-  when: "firewall_rules.stat.exists == false"
+  when: "firewall_rules.stat.exists == false and ansible_connection != 'docker' "
 
-- name: Reload Firewall
-  command: firewall-cmd --reload
-  become: true
-
+#- name: Reload Firewall
+#  command: firewall-cmd --reload
+#  become: true
 
 #- name: Restart FirewallD
 #  systemd:

@@ -1,64 +1,45 @@
-- name: Add Mysql Repo
-  template:
-    src: mysql-community.repo.j2
-    dest: /etc/yum.repos.d/mysql-community.repo
-    mode: 0644
-  become: true
-
 - name: Install dependancies
-  yum:
-    name: ['perl-IO-Compress', 'perl-Net-LibIDN', 'perl-IO-String', 'perl-DBI', 'perl-Net-Daemon', ]
+  package:
+    name: ['perl-IO-Compress', 'libaio1', 'perl-Net-LibIDN', 'perl-IO-String', 'perl-DBI', 'perl-Net-Daemon', ]
     state: present
   become: true
 
-- name: Update pip for python dependancies
-  command: "pip install --upgrade pip"
-  become: true
+- name: Download binaries
+  command: wget --continue -P /var/tmp http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.3/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz
 
-# This installs a list of packages and
-# creates the mysql user
-# https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-install-linux-rpm.html
-- name: Install mysql-cluster-community-server
-  yum:
-    name: mysql-cluster-community-server
-    state: present
-  become: true
+- name: Extract binaries
+  command: tar -C /usr/local -xzf /var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64.tar.gz creates=/usr/local/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64
 
-- name: Create mysql log file
-  file:
-    path: /var/log/mysqld.log
-    owner: mysql
-    group: mysql
-    mode: 0644
-  become: true
+- name: Link binary directory to short name
+  command: ln -s /usr/local/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64 /usr/local/mysql creates=/usr/local/mysql
 
-- import_tasks: firewall.yml
-  vars:
-    mysql_custom_port: "{{ mysql_port }} "
+- name: Create mysql group
+  group: name=mysql system=yes
 
-- name: Set permissions for mysql data dir
-  file:
-    path: /var/lib/mysql/
-    owner: mysql
-    group: mysql
-    recurse: yes
-    mode: 0755
+- name: Create myslq user
+  user: name=mysql system=yes createhome=no group=mysql
 
-- name: Install config BOCA
-  template:
-    src: "my.cnf.j2"
-    dest: /etc/my.cnf
-    mode: 0644
-  become: true
-  when: scope != "atl"
+- name: Install mysql DB
+  command: ./scripts/mysql_install_db --user=mysql chdir=/usr/local/mysql/ creates=/usr/local/mysql/data/mysql/user.frm
 
-- name: Install config ATL
-  template:
-    src: "atl/my.cnf.j2"
-    dest: /etc/my.cnf
-    mode: 0644
-  become: true
-  when: scope == "atl"
+- name: Set permissions
+  shell: chown -R mysql /usr/local/mysql/data && chgrp -R mysql /usr/local/mysql/
 
-# Setting up Mysql secure connection
-- import_tasks: "secure.yml"
+- name: Install init file
+  command: install /usr/local/mysql/support-files/mysql.server /etc/init.d/ creates=/etc/init.d/mysql.server
+
+- name: Install config
+  template: src=my.cnf dest=/etc/my.cnf
+
+- name: Activate init script and start mysql server
+  service: name=mysql.server enabled=yes state=started
+
+- name: Alter tables to allow user replication
+  command: /usr/local/mysql/bin/mysql -e 'ALTER TABLE mysql.{{ item }} ENGINE=NDBCLUSTER;' creates=/usr/local/mysql/data/mysql/{{ item }}.ndb
+  with_items:
+  - user
+  - db
+  - tables_priv
+  - columns_priv
+  - procs_priv
+  - proxies_priv

@@ -1,57 +1,45 @@
-- name: Add Mysql Repo
+- name: Download binaries
+  get_url:
+    url: "{{ mysql_tar_url }}"
+    dest: /var/tmp
+    #mode: '0440'
+
+- name: Extract binaries
+  unarchive:
+    src: "/var/tmp/{{ mysql_tar }}"
+    dest: "/var/tmp/"
+    remote_src: yes
+  become: true
+
+- name: Install nbd binaries
+  command: install ndb_mgmd ndb_mgm /usr/local/bin/ chdir=/var/tmp/mysql-cluster-gpl-7.3.4-linux-glibc2.5-x86_64/bin/ creates=/usr/local/bin/ndb_mgmd
+  become: true
+
+- name: Install init file
   template:
-    src: mysql-community.repo.j2
-    dest: /etc/yum.repos.d/mysql-community.repo
-    mode: 0644
+    src: "ndb_mgmd.init"
+    dest: "/etc/init.d/ndb_mgmd"
   become: true
 
-- name: install mysql-cluster-community-management-server
-  yum:
-    name: mysql-cluster-community-management-server
-    state: present
+- name: Activate ndb_mgmd init file
+  service:
+    name: ndb_mgmd
+    enabled: yes
   become: true
 
-- import_tasks: firewall.yml
-  vars:
-    mysql_custom_port: "{{ mysql_ndb_port }}"
-
-- name: Copy config.ini to /var/lib/mysql-cluster/
-  template:
-    src: config.ini.j2
-    dest: /var/lib/mysql-cluster/config.ini
-    mode: 0755
-  become: true
-
-- name: Install config BOCA
-  template:
-    src: "my.cnf.j2"
-    dest: /etc/my.cnf
-    mode: 0644
-  become: true
-  when: scope != "atl"
-
-- name: Install config ATL
-  template:
-    src: "atl/my.cnf.j2"
-    dest: /etc/my.cnf
-    mode: 0644
-  become: true
-  when: scope == "atl"
-
-- name: Set permissions for mysql data dir
+- name: Create data dir /var/lib/mysql-cluster
   file:
     path: /var/lib/mysql-cluster
-    owner: mysql
-    group: mysql
-    recurse: yes
-    mode: 0755
+    mode: 0644
+    state: directory
+  become: true
+
+- name: Copy config
+  template:
+    src: "config.ini.j2"
+    dest: /var/lib/mysql-cluster/config.ini
+  become: true
 
 - name: Initialize ndb_mgmd
-#  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster
-  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --config-dir=/var/lib/mysql-cluster --ndb-nodeid=1
+  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini --initial --config-dir=/var/lib/mysql-cluster/ creates=/var/lib/mysql-cluster/ndb_1_cluster.log
   become: true
-  ignore_errors: true
-
-#- name: Initialize ndb_mgmd
-#  command: ndb_mgmd
-#  become: true
